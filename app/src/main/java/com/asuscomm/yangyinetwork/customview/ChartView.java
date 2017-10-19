@@ -1,10 +1,12 @@
 package com.asuscomm.yangyinetwork.customview;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.util.AttributeSet;
 import android.view.View;
 
 import java.io.InputStream;
@@ -25,9 +27,13 @@ public class ChartView extends View {
     float textHeight;
     Rect textBounds = new Rect();
 
-    public ChartView(Context context, int resId) {
-        super(context);
+    public ChartView(Context context, AttributeSet attributeSet) {
+        super(context, attributeSet);
         setBackgroundColor(Color.BLACK);
+        TypedArray typedArray = context.getTheme().obtainStyledAttributes(
+                attributeSet, R.styleable.ChartView, 0, 0);
+        // Second 0 means default value
+        int resId = typedArray.getResourceId(R.styleable.ChartView_data, 0);
 
         InputStream inputStream = getResources().openRawResource(resId);
         data = CSVParser.read(inputStream);

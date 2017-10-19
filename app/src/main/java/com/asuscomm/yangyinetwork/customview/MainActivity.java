@@ -23,9 +23,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        chartView = new ChartView(this, R.raw.goog);
-        RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.activity_main);
-        relativeLayout.addView(chartView);
+        chartView = (ChartView) findViewById(R.id.chartView);
+//        chartView = new ChartView(this, R.raw.goog);
     }
 
     @Override
