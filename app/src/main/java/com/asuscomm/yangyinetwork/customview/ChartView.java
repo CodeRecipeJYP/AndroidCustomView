@@ -31,6 +31,14 @@ public class ChartView extends View {
     protected void onDraw(Canvas canvas) {
         width = canvas.getWidth();
         height = canvas.getHeight();
-        canvas.drawRect(0, height / 2, width, 0, paint);
+        float rectWidth = width / data.size();
+        float left = 0;
+
+        for (int i = data.size() - 1; i >= 0; i--) {
+            StockData stockData = data.get(i);
+            canvas.drawRect(left, height - stockData.high, left + rectWidth, height - stockData.low, paint);
+            left += rectWidth;
+        }
+//        canvas.drawRect(0, height / 2, width, 0, paint);
     }
 }
