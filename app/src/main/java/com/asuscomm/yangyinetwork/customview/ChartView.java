@@ -19,15 +19,16 @@ public class ChartView extends View {
 
     float width, height, maxPrice, minPrice;
     Paint paint = new Paint();
+    Paint strokePaint = new Paint();
 
     public ChartView(Context context, int resId) {
         super(context);
-        setBackgroundColor(Color.RED);
+        setBackgroundColor(Color.BLACK);
 
         InputStream inputStream = getResources().openRawResource(resId);
         data = CSVParser.read(inputStream);
         showLast();
-        paint.setColor(Color.GREEN);
+        strokePaint.setColor(Color.WHITE);
     }
 
     @Override
@@ -35,11 +36,25 @@ public class ChartView extends View {
         width = canvas.getWidth();
         height = canvas.getHeight();
         float rectWidth = width / subset.size();
+        strokePaint.setStrokeWidth(rectWidth / 8);
         float left = 0;
+        float bottom, top;
 
         for (int i = subset.size() - 1; i >= 0; i--) {
             StockData stockData = subset.get(i);
-            canvas.drawRect(left, getYPosition(stockData.high), left + rectWidth, getYPosition(stockData.low), paint);
+            if (stockData.close >= stockData.open) {
+                paint.setColor(Color.GREEN);
+                top = stockData.close;
+                bottom = stockData.open;
+            } else {
+                paint.setColor(Color.RED);
+                top = stockData.open;
+                bottom = stockData.close;
+            }
+
+            canvas.drawLine(left + rectWidth / 2, getYPosition(stockData.high),
+                    left + rectWidth / 2, getYPosition(stockData.low), strokePaint);
+            canvas.drawRect(left, getYPosition(top), left + rectWidth, getYPosition(bottom), paint);
             left += rectWidth;
         }
 //        canvas.drawRect(0, height / 2, width, 0, paint);
