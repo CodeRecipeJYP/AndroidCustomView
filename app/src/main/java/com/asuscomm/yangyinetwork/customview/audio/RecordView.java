@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,42 +20,67 @@ import java.util.List;
 
 public class RecordView extends View {
     private static final String TAG = "RecordView";
-    short[] data;
+    List<short[]> stackedData = new ArrayList<>();
 
-    float width, height, maxPrice, minPrice;
+    float width, height;
     Paint paint = new Paint();
+    int SAMPLINGRATE = 44100;
+    int VISUALDOT_PERSECOND = 10;
+    int SAMPLES_PER_SINGLEVISUALDOT = SAMPLINGRATE / VISUALDOT_PERSECOND;
 
 
     public RecordView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
-        data = new short[0];
     }
 
     public void setSamples(short[] data) {
-        Log.d(TAG, "setSamples() called with: data = [" + data.length + "]");
 //        Log.d(TAG, "setSamples() called with: data = [" + Arrays.toString(data) + "]");
-        this.data = data;
+        stackedData.add(data);
         postInvalidate();
     }
 
     protected void onDraw(Canvas canvas) {
+        int totalSize;
+        if (stackedData.isEmpty()) {
+            return;
+        } else {
+            totalSize = stackedData.size() * stackedData.get(0).length;
+        }
         width = canvas.getWidth();
         height = canvas.getHeight();
+
+
         float middleHeight = height / 2;
-        float rectWidth = width / data.length;
+        float rectWidth = width / totalSize * SAMPLES_PER_SINGLEVISUALDOT;
         float left = 0;
 
         float maximum = 0;
-        for (int i = data.length - 1; i >= 0; i--) {
-            short amplitude = data[i];
-            paint.setColor(Color.BLACK);
-            if (amplitude > maximum) {
-                maximum = amplitude;
+        int totalidx = 0;
+        long bufferAmplitude = 0;
+        Log.d(TAG, "onDraw: stackedData = [" + stackedData.size() + "]");
+        Log.d(TAG, "onDraw: totalSize = [" + totalSize + "]");
+        Log.d(TAG, "onDraw: num of visualdots = [" + totalSize / SAMPLES_PER_SINGLEVISUALDOT + "]");
+
+        for (int i = 0; i < stackedData.size(); i++) {
+            short[] data = stackedData.get(i);
+            for (int j = 0; j < data.length; j++) {
+                totalidx++;
+                short amplitude = data[i];
+                bufferAmplitude += amplitude;
+                if (totalidx % SAMPLES_PER_SINGLEVISUALDOT == 0) {
+//                    Log.d(TAG, "onDraw: bufferAmplitude=" + bufferAmplitude);
+                    paint.setColor(Color.BLACK);
+                    if (bufferAmplitude > maximum) {
+                        maximum = bufferAmplitude;
+                    }
+                    short nomalizedAmplitude = (short) (bufferAmplitude / SAMPLES_PER_SINGLEVISUALDOT);
+                    float heightPortion = (float) (nomalizedAmplitude / Short.MAX_VALUE * 10);
+                    canvas.drawRect(left, middleHeight, left + rectWidth, middleHeight + middleHeight * heightPortion, paint);
+                    canvas.drawRect(left, middleHeight, left + rectWidth, middleHeight - middleHeight * heightPortion, paint);
+                    left += rectWidth;
+                    bufferAmplitude = 0;
+                }
             }
-            float heightPortion = (float) (Math.log10(amplitude) / Math.log10(Short.MAX_VALUE));
-            canvas.drawRect(left, middleHeight, left + rectWidth, middleHeight + middleHeight * heightPortion, paint);
-            canvas.drawRect(left, middleHeight, left + rectWidth, middleHeight - middleHeight * heightPortion, paint);
-            left += rectWidth;
         }
 
         Log.d(TAG, "onDraw: maximum=" + maximum);

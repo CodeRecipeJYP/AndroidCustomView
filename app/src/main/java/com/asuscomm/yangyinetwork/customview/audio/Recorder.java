@@ -3,6 +3,7 @@ package com.asuscomm.yangyinetwork.customview.audio;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.media.audiofx.Visualizer;
 import android.util.Log;
 
 /**
@@ -41,6 +42,8 @@ public class Recorder {
             }
         });
         mThread.start();
+
+        new Visualizer(0);
     }
 
     public void stopRecording() {
