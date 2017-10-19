@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.view.View;
 
 import java.io.InputStream;
@@ -20,6 +21,9 @@ public class ChartView extends View {
     float width, height, maxPrice, minPrice;
     Paint paint = new Paint();
     Paint strokePaint = new Paint();
+    Paint textPaint = new Paint();
+    float textHeight;
+    Rect textBounds = new Rect();
 
     public ChartView(Context context, int resId) {
         super(context);
@@ -29,13 +33,19 @@ public class ChartView extends View {
         data = CSVParser.read(inputStream);
         showLast();
         strokePaint.setColor(Color.WHITE);
+        textPaint.setColor(Color.WHITE);
+        textPaint.setTextSize(40f);
+        textPaint.setTextAlign(Paint.Align.RIGHT);
+        textPaint.getTextBounds("0", 0, 1, textBounds);
+        textHeight = textBounds.height();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         width = canvas.getWidth();
         height = canvas.getHeight();
-        float rectWidth = width / subset.size();
+        float chartWidth = width - textPaint.measureText("1000");
+        float rectWidth = chartWidth / subset.size();
         strokePaint.setStrokeWidth(rectWidth / 8);
         float left = 0;
         float bottom, top;
@@ -56,6 +66,14 @@ public class ChartView extends View {
                     left + rectWidth / 2, getYPosition(stockData.low), strokePaint);
             canvas.drawRect(left, getYPosition(top), left + rectWidth, getYPosition(bottom), paint);
             left += rectWidth;
+        }
+
+        for (int i = (int) minPrice; i < maxPrice; i++) {
+            if (i % 20 == 0) {
+                strokePaint.setStrokeWidth(1);
+                canvas.drawLine(0, getYPosition(i), chartWidth, getYPosition(i), strokePaint);
+                canvas.drawText(i + "", width, getYPosition(i) + textHeight / 2, textPaint);
+            }
         }
 //        canvas.drawRect(0, height / 2, width, 0, paint);
     }
