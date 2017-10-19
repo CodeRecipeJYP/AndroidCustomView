@@ -14,14 +14,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        InputStream inputStream = getResources().openRawResource(R.raw.goog);
-        List<StockData> data = CSVParser.read(inputStream);
-
-        for (StockData stockData : data) {
-            System.out.println(stockData.toString());
-        }
-
-        ChartView chartView = new ChartView(this);
+        ChartView chartView = new ChartView(this, R.raw.goog);
         RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.activity_main);
         relativeLayout.addView(chartView);
     }
