@@ -1,6 +1,7 @@
 package com.asuscomm.yangyinetwork.customview.v2;
 
 import android.Manifest;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +21,12 @@ public class AmplitudeActivity extends AppCompatActivity {
 
         Log.d(TAG, "onCreate: ");
         getPermission();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
         record();
     }
 
