@@ -18,11 +18,12 @@ import java.util.List;
 
 public class RecordViewV2 extends View {
     private static final String TAG = "RecordView";
-    List<Short> stackedData = new ArrayList<>();
+    List<Integer> stackedData = new ArrayList<>();
 
     float width, height;
     Paint strokePaint = new Paint();
     int SAMPLES_IN_DISPLAY = 1000;
+    private double max = 0;
 
 
     public RecordViewV2(Context context, AttributeSet attributeSet) {
@@ -31,7 +32,7 @@ public class RecordViewV2 extends View {
         strokePaint.setColor(Color.BLACK);
     }
 
-    public void addSample(short sample) {
+    public void addSample(int sample) {
 //        Log.d(TAG, "setSamples() called with: data = [" + Arrays.toString(data) + "]");
         Log.d(TAG, "addSample() called with: sample = [" + sample + "]");
         stackedData.add(sample);
@@ -58,10 +59,14 @@ public class RecordViewV2 extends View {
         Log.d(TAG, "onDraw: totalSize = [" + totalSize + "]");
 
         for (int i = 0; i < stackedData.size(); i++) {
-            short data = stackedData.get(i);
-            float heightPortion = (float) ((float) Math.log(data) / Math.log(Short.MAX_VALUE));
+            int data = stackedData.get(i);
+            if (max < data) {
+                max = data;
+            }
+            float heightPortion = (float) ((float) data / max);
+//            float heightPortion = (float) ((float) Math.log(data) / Math.log(max));
 //            Log.d(TAG, "onDraw: data=" + data);
-//            Log.d(TAG, "onDraw: Short.MAX_VALUE =" + Short.MAX_VALUE);
+//            Log.d(TAG, "onDraw: int.MAX_VALUE =" + int.MAX_VALUE);
 //            Log.d(TAG, "onDraw() called with: i = [" + heightPortion + "]");
             canvas.drawLine(left, middleHeight, left, middleHeight + middleHeight*heightPortion, strokePaint);
             canvas.drawLine(left, middleHeight, left, middleHeight - middleHeight*heightPortion, strokePaint);
