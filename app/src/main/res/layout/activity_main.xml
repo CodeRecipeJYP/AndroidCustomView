@@ -12,12 +12,14 @@
         android:id="@+id/chartView"
         custom:data="@raw/goog"
         android:layout_width="200dp"
-        android:layout_height="200dp" />
+        android:layout_height="200dp"
+        />
 
     <com.asuscomm.yangyinetwork.customview.audio.RecordView
         android:id="@+id/recordView"
         android:layout_width="200dp"
-        android:layout_height="200dp" />
+        android:layout_height="200dp"
+        />
 
     <Button
         android:id="@+id/recordBtn"
