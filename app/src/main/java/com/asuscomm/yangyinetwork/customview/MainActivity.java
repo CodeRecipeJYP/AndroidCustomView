@@ -2,6 +2,8 @@ package com.asuscomm.yangyinetwork.customview;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.media.audiofx.Visualizer;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -16,11 +18,13 @@ import android.widget.RelativeLayout;
 
 import com.asuscomm.yangyinetwork.customview.audio.RecordView;
 import com.asuscomm.yangyinetwork.customview.audio.Recorder;
+import com.asuscomm.yangyinetwork.customview.audio.RendererFactory;
+import com.asuscomm.yangyinetwork.customview.audio.WaveformView;
 
 import java.io.InputStream;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Visualizer.OnDataCaptureListener {
     private static final String TAG = "MainActivity";
 
     private int REQUEST_RECORD_AUDIO_CODE = 123;
@@ -32,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private ChartView chartView;
     private RecordView mRecordView;
     private Recorder mRecorder;
+    private Visualizer visualiser;
+    private WaveformView waveformView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,15 +55,32 @@ public class MainActivity extends AppCompatActivity {
         );
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO)
+                == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.MODIFY_AUDIO_SETTINGS)
                 == PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "onCreate: PERMISSION_GRANTED");
             initRecord();
+            initWaveformView();
         } else {
             Log.d(TAG, "onCreate: REQUEST_PERMISSION");
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO_CODE);
+            ActivityCompat.requestPermissions(this, new String[]{
+                            Manifest.permission.RECORD_AUDIO,
+                            Manifest.permission.MODIFY_AUDIO_SETTINGS
+            }, REQUEST_RECORD_AUDIO_CODE);
         }
-
 //        chartView = new ChartView(this, R.raw.goog);
+    }
+
+    private void initWaveformView() {
+        waveformView = (WaveformView) findViewById(R.id.waveformView);
+        RendererFactory rendererFactory = new RendererFactory();
+        waveformView.setRenderer(rendererFactory.createSimpleWaveformRenderer(Color.GREEN, Color.DKGRAY));
+
+        final int CAPTURE_SIZE = 256;
+        visualiser = new Visualizer(0);
+        visualiser.setDataCaptureListener(this, Visualizer.getMaxCaptureRate(), true, false);
+        visualiser.setCaptureSize(CAPTURE_SIZE);
+        visualiser.setEnabled(true);
     }
 
     @Override
@@ -65,7 +88,8 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_RECORD_AUDIO_CODE) {
             if (grantResults.length > 0) {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    initRecord();
+//                    initRecord();
+                    initWaveformView();
                 }
             }
         }
@@ -113,5 +137,17 @@ public class MainActivity extends AppCompatActivity {
         menu.add(ALL_DATA);
 
         return true;
+    }
+
+    @Override
+    public void onWaveFormDataCapture(Visualizer visualizer, byte[] bytes, int i) {
+        if (waveformView != null) {
+            waveformView.setWaveform(bytes);
+        }
+    }
+
+    @Override
+    public void onFftDataCapture(Visualizer visualizer, byte[] bytes, int i) {
+
     }
 }

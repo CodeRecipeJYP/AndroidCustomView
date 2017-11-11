@@ -26,5 +26,11 @@
         android:text="Record"
         />
 
+    <com.asuscomm.yangyinetwork.customview.audio.WaveformView
+        android:id="@+id/waveformView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+
 
 </LinearLayout>

@@ -54,6 +54,7 @@ public class Recorder {
         mThread = null;
     }
 
+
     private void record() {
         Log.v(TAG, "Start");
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
